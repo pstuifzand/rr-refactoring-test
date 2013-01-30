@@ -24,12 +24,25 @@ script         ::= expression+                       action => do_stmt_list sepa
 expression     ::= number                            action => do_num
                  | variable                          action => do_var
                  | tree_var                          action => do_tree_var
+                 | '!' expression                    action => do_not assoc => left
                  | '(' expression ')'                assoc => group action => do_arg1
                  | expression '(' args ')'           action => do_func
+                 | expression '[' args ']'           action => do_array
+                || expression '&' expression         action => do_expr
+                 | expression '|' expression         action => do_expr
                 || expression '*' expression         action => do_expr
                  | expression '/' expression         action => do_expr
+                 | expression '%' expression         action => do_expr
                 || expression '+' expression         action => do_expr
                  | expression '-' expression         action => do_expr
+                || expression '<' expression         action => do_expr
+                 | expression '>' expression         action => do_expr
+                 | expression '<=' expression        action => do_expr
+                 | expression '>=' expression        action => do_expr
+                 | expression '==' expression        action => do_expr
+                 | expression '!=' expression        action => do_expr
+                || expression '||' expression        action => do_expr
+                || expression '&&' expression        action => do_expr
 
 args           ::= expression*                       action => do_list separator => comma 
 
@@ -37,8 +50,8 @@ comma          ~ ','
 semicolon      ~ ';'
 number         ~ [\d]+
 tree_var       ~ ':' tree_var_1
-variable       ~ [a-z]+
-tree_var_1     ~ [a-z]+
+variable       ~ [_a-z]+
+tree_var_1     ~ [_a-z]+
 
 :discard       ~ whitespace
 whitespace     ~ [\s]+
@@ -87,7 +100,9 @@ use RR::Node::Var;
 use RR::Node::TVar;
 use RR::Node::Tree;
 use RR::Node::Op;
+use RR::Node::UnaryOp;
 use RR::Node::Call;
+use RR::Node::Array;
 use RR::Node::StmtList;
 
 sub new {
@@ -146,9 +161,21 @@ sub do_func {
     shift;
     return RR::Node::Call->new($_[0], $_[2]);
 }
+
+sub do_array {
+    shift;
+    return RR::Node::Array->new($_[0], $_[2]);
+}
+
 sub do_arg1 {
     shift;
     return $_[1];
 }
+
+sub do_not {
+    shift;
+    return RR::Node::UnaryOp->new($_[0], $_[1]);
+}
+
 
 1;
