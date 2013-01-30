@@ -14,7 +14,13 @@ sub lines {
 
 sub serialize {
     my $self = shift;
-    return join(";\n", map {$_->serialize} $self->lines);
+    my $depth = shift;
+    my $prefix = "    " if $depth >= 1;
+    my @lines  = map { split /\n/, $_->serialize($depth) } $self->lines;
+    for (@lines) {
+        $_ = $prefix.$_;
+    }
+    return join "\n", @lines;
 }
 
 sub expr_match {

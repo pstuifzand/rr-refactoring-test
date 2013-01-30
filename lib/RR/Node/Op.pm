@@ -24,6 +24,7 @@ sub op {
 
 sub serialize {
     my $self = shift;
+    my $depth = shift;
     return '('. $self->left->serialize . ' ' . $self->op . ' ' . $self->right->serialize .')';
 }
 

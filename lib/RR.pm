@@ -19,7 +19,7 @@ sub new {
 
 :start         ::= script
 
-script         ::= expression+                       action => do_stmt_list separator => semicolon proper => 0
+script         ::= expression+                       action => do_stmt_list
 
 expression     ::= number                            action => do_num
                  | variable                          action => do_var
@@ -43,11 +43,12 @@ expression     ::= number                            action => do_num
                  | expression '!=' expression        action => do_expr
                 || expression '||' expression        action => do_expr
                 || expression '&&' expression        action => do_expr
+                 | expression '=' expression                action => do_expr assoc=>right
+                 | ('if' '(') expression (')' '{') script ('}')   action => do_if_block
 
 args           ::= expression*                       action => do_list separator => comma 
 
 comma          ~ ','
-semicolon      ~ ';'
 number         ~ [\d]+
 tree_var       ~ ':' tree_var_1
 variable       ~ [_a-z]+
@@ -79,8 +80,8 @@ sub parse_rr {
 sub replace {
     my ($source, $from, $to) = @_;
     my $st = parse_rr($source);
-    my $ft = parse_rr($from);
-    my $tt = parse_rr($to);
+    my $ft = (parse_rr($from)->lines)[0];
+    my $tt = (parse_rr($to)->lines)[0];
     my %matches;
     my $tree = $st->recurse($ft, $tt, \%matches);
     return serialize($tree);
@@ -88,7 +89,7 @@ sub replace {
 
 sub serialize {
     my ($tree) = @_;
-    return $tree->serialize;
+    return $tree->serialize(0);
 }
 
 package RR::Actions;
@@ -104,6 +105,7 @@ use RR::Node::UnaryOp;
 use RR::Node::Call;
 use RR::Node::Array;
 use RR::Node::StmtList;
+use RR::Node::IfStmt;
 
 sub new {
     my ($class) = @_;
@@ -137,9 +139,6 @@ sub do_expr {
 
 sub do_stmt_list {
     shift;
-    if (@_ == 1) {
-        return $_[0];
-    }
     return RR::Node::StmtList->new(\@_);
 }
 
@@ -175,6 +174,11 @@ sub do_arg1 {
 sub do_not {
     shift;
     return RR::Node::UnaryOp->new($_[0], $_[1]);
+}
+
+sub do_if_block {
+    shift;
+    return RR::Node::IfStmt->new($_[0], $_[1]);
 }
 
 

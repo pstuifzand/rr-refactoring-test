@@ -23,7 +23,8 @@ sub args {
 
 sub serialize {
     my $self = shift;
-    return $self->name->serialize . '(' . join(', ', map { $_->serialize } $self->args) . ')';
+    my $depth = shift;
+    return $self->name->serialize($depth) . '(' . join(', ', map { $_->serialize($depth) } $self->args) . ')';
 }
 
 sub expr_match {
