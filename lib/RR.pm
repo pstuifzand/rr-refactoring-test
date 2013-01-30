@@ -19,7 +19,7 @@ sub new {
 
 :start         ::= script
 
-script         ::= expression+                       action => do_stmt_list
+script         ::= expression+                       action => do_stmt_list separator => semicolon proper => 0
 
 expression     ::= number                            action => do_num
                  | variable                          action => do_var
@@ -45,10 +45,12 @@ expression     ::= number                            action => do_num
                 || expression '&&' expression        action => do_expr
                  | expression '=' expression                action => do_expr assoc=>right
                  | ('if' '(') expression (')' '{') script ('}')   action => do_if_block
+                 | ('while' '(') expression (')' '{') script ('}')   action => do_while_block
 
 args           ::= expression*                       action => do_list separator => comma 
 
 comma          ~ ','
+semicolon      ~ ';'
 number         ~ [\d]+
 tree_var       ~ ':' tree_var_1
 variable       ~ [_a-z]+
@@ -106,6 +108,7 @@ use RR::Node::Call;
 use RR::Node::Array;
 use RR::Node::StmtList;
 use RR::Node::IfStmt;
+use RR::Node::WhileStmt;
 
 sub new {
     my ($class) = @_;
@@ -179,6 +182,11 @@ sub do_not {
 sub do_if_block {
     shift;
     return RR::Node::IfStmt->new($_[0], $_[1]);
+}
+
+sub do_while_block {
+    shift;
+    return RR::Node::WhileStmt->new($_[0], $_[1]);
 }
 
 

@@ -1,9 +1,13 @@
 package RR::Node::Op;
 use strict;
 use parent 'RR::Node';
+use Carp;
 
 sub new {
     my ($class, $op, $left, $right) = @_;
+    confess "op == undef" if !defined $op;
+    confess "left == undef" if !defined $left;
+    confess "right == undef" if !defined $right;
     return bless {op =>$op,l=>$left,r=>$right}, $class;
 }
 

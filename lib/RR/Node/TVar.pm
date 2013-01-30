@@ -19,23 +19,23 @@ sub serialize {
 
 sub expr_match {
     my ($self, $ft, $matches) = @_;
-    $matches->{$self->var} = $ft;
     return 1;
+    #return $self->var eq $ft->var;
+    #$matches->{$self->var} = $ft;
+    #return 1;
 }
 
 sub recurse {
     my ($self, $ft, $tt, $matches) = @_;
-
-    if ($self->var eq $ft->var) {
-        return $tt;
-    }
-
-    return $self;
+    return $tt->replace($matches);
 }
 
 sub replace {
     my ($self, $matches) = @_;
-    return $matches->{$self->var};
+    if (exists $matches->{$self->var}) {
+        return $matches->{$self->var};
+    }
+    return $self;
 }
 
 1;

@@ -16,7 +16,7 @@ sub serialize {
     my $self = shift;
     my $depth = shift;
     my $prefix = "    " if $depth >= 1;
-    my @lines  = map { split /\n/, $_->serialize($depth) } $self->lines;
+    my @lines  = split /\n/, join ";\n", map { $_->serialize($depth) } $self->lines;
     for (@lines) {
         $_ = $prefix.$_;
     }
@@ -59,8 +59,12 @@ sub recurse {
 }
 
 sub replace {
-    my ($self, $ft, $tt, $matches) = @_;
-    return $self->recurse($ft, $tt, $matches);
+    my ($self, $matches) = @_;
+    my @lines;
+    for ($self->lines) {
+        push @lines, $_->replace($matches);
+    }
+    return RR::Node::StmtList->new(\@lines);
 }
 
 1;

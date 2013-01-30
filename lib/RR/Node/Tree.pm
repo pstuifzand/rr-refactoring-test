@@ -25,14 +25,6 @@ sub expr_match {
 
 sub recurse {
     my ($self, $ft, $tt, $matches) = @_;
-
-    use Data::Dumper;
-    print Dumper($ft);
-
-    if ($self->var eq $ft->var) {
-        return $tt->replace($matches);
-    }
-
     return $self;
 }
 
