@@ -11,7 +11,7 @@ sub match {
     }
     my $res = eval { $self->expr_match($b, $matches) };
     if ($@) {
-        warn "Failed: $@";
+        #warn "Failed: $@";
         return;
     }
     return $res;
